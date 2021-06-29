@@ -1,19 +1,43 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:payflow/modules/home_page/home_page.dart';
-import 'package:payflow/shared/themes/app_colors.dart';
+import 'package:payflow/app_widget.dart';
+import 'package:payflow/shared/themes/app_texts.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(AppFirebase());
 }
 
-class MyApp extends StatelessWidget {
+class AppFirebase extends StatefulWidget {
+  @override
+  _AppFirebaseState createState() => _AppFirebaseState();
+}
+
+class _AppFirebaseState extends State<AppFirebase> {
+  final Future<FirebaseApp> _initialization = Firebase.initializeApp();
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Pay Flow',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(primaryColor: AppColors.primary),
-      home: HomePage(),
-    );
+    return FutureBuilder(
+        future: _initialization,
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            return Material(
+              child: Center(
+                child: Text(
+                  AppTexts.errorConnectFirebase,
+                  textDirection: TextDirection.ltr,
+                ),
+              ),
+            );
+          } else if (snapshot.connectionState == ConnectionState.done) {
+            return AppWidget();
+          } else {
+            return Material(
+              child: Center(
+                child: CircularProgressIndicator(),
+              ),
+            );
+          }
+        });
   }
 }
